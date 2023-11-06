@@ -7,6 +7,7 @@ package com.cos.security1.config.auth;
 // User Object Type => UserDetails Type Object
 
 import com.cos.security1.model.User;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 // Security Session=> Authentication => UserDetails(PrincipalDetails)
+@Data
 public class PrincipalDetails implements UserDetails {
 
     private User user;  // Composition
@@ -67,10 +69,10 @@ public class PrincipalDetails implements UserDetails {
     // 계정이 활성화 되어있는가?
     @Override
     public boolean isEnabled() {
-
         // 비활성화가 되는 경우
-        //
-
+        // 1년동안 회원이 로그인을 안하면 휴면 계정으로 하기로 함
+        // user.getLoginDate();
+        // 현재시간 - 마지막 로그인 시간>1년?return false:return true;
         return true;
     }
 }

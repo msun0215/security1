@@ -1,12 +1,17 @@
 package com.cos.security1.controller;
 
+import com.cos.security1.config.auth.PrincipalDetails;
 import com.cos.security1.model.User;
 import com.cos.security1.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller // View를 return!
 public class IndexController {
@@ -16,6 +21,14 @@ public class IndexController {
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @GetMapping("/test/login")
+    public @ResponseBody String loginTest(Authentication authentication){       // Dependency Injection
+        System.out.println("/test/login=========================");
+        PrincipalDetails principalDetails=(PrincipalDetails)authentication.getPrincipal();
+        System.out.println("authentication : "+principalDetails.getUser());
+        return "세션 정보 확인하기";
+    }
 
     // localhost: 8080/
     // localhost: 8080
@@ -27,7 +40,7 @@ public class IndexController {
     }
 
     @GetMapping("/user")
-    public String user(){
+    public @ResponseBody String user(){
         return "user";
     }
 
@@ -62,6 +75,22 @@ public class IndexController {
         userRepository.save(user);
 
         return "redirect:/loginForm";
+    }
+
+    // Secured Annotation으로 권한 부여
+    @Secured("ROLE_ADMIN")
+    @GetMapping("/info")
+    public @ResponseBody String info(){
+        return "개인정보";
+    }
+
+    //@PreAuthorize("ROLE_MANAGER")
+    @PreAuthorize("hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
+    // 권한을 하나만 부여할때는 @Secured가 편하지만
+    // 여러 사람에게 권한을 부여할거면 @PreAuthorize가 더 낫다
+    @GetMapping("/data")
+    public @ResponseBody String data(){
+        return "데이터 정보";
     }
 
     @GetMapping("/joinForm")
