@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,11 +25,31 @@ public class IndexController {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @GetMapping("/test/login")
-    public @ResponseBody String loginTest(Authentication authentication){       // Dependency Injection
+    public @ResponseBody String testLogin(Authentication authentication
+    , @AuthenticationPrincipal PrincipalDetails userDetails){       // Dependency Injection
         System.out.println("/test/login=========================");
         PrincipalDetails principalDetails=(PrincipalDetails)authentication.getPrincipal();
+        // authentication.getPrincipal()은 Object Type
         System.out.println("authentication : "+principalDetails.getUser());
-        return "세션 정보 확인하기";
+
+        System.out.println("userDetails : "+userDetails.getUsername());
+        // @AuthenticationPrincipal로 받은 userDetails와 principlaDetails.getUser()로 받은 데이터는 동일함.
+        return "Session 정보 확인하기";
+    }
+
+
+    @GetMapping("/test/oauth/login")
+    public @ResponseBody String testOAuthLogin(Authentication authentication
+            , @AuthenticationPrincipal OAuth2User oauth){       // Dependency Injection
+        System.out.println("/test/oauth/login=========================");
+        OAuth2User oAuth2User=(OAuth2User)authentication.getPrincipal();
+        // oauth를 통해서 로그인할 경우 casting을 다르게 해야함
+        // authentication.getPrincipal()은 Object Type
+        System.out.println("authentication : "+oAuth2User.getAttributes());
+
+        System.out.println("oauth2User : "+oauth.getAttributes());
+        // @AuthenticationPrincipal로 받은 userDetails와 principlaDetails.getUser()로 받은 데이터는 동일함.
+        return "OAuth Session 정보 확인하기";
     }
 
     // localhost: 8080/
@@ -39,8 +61,11 @@ public class IndexController {
         return "index"; // src/main/resources/templates/index.mustache
     }
 
+    // OAuth 로그인을 해도 PrincipalDetails로 받을 수 있고
+    // 일반 로그인을 해도 PrincipalDetails로 받을 수 있다
     @GetMapping("/user")
-    public @ResponseBody String user(){
+    public @ResponseBody String user(@AuthenticationPrincipal PrincipalDetails principalDetails){
+        System.out.println("principleDetails : "+principalDetails.getUser());
         return "user";
     }
 
