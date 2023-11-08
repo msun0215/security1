@@ -1,10 +1,14 @@
 package com.cos.security1.config.oauth;
 
 import com.cos.security1.config.auth.PrincipalDetails;
+import com.cos.security1.config.oauth.provider.FacebookUserInfo;
+import com.cos.security1.config.oauth.provider.GoogleUserInfo;
+import com.cos.security1.config.oauth.provider.OAuth2UserInfo;
 import com.cos.security1.model.User;
 import com.cos.security1.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -16,6 +20,7 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+    //private PasswordEncoder passwordEncoder;
 
     @Autowired
     private UserRepository userRepository;
@@ -34,12 +39,26 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
         //System.out.println("getAttributes : "+super.loadUser(userRequest).getAttributes());
         System.out.println("getAttributes : "+oAuth2User.getAttributes());
 
+        OAuth2UserInfo oAuth2UserInfo=null;
         // super.loadUser를 통해서 받은 정보를 토대로 강제 회원가입 시키기
-        String provider=userRequest.getClientRegistration().getClientId();  // Google
-        String providerId=oAuth2User.getAttribute("sub");       // Google ID
+        if(userRequest.getClientRegistration().getRegistrationId().equals("google")){
+            System.out.println("Google Login Try");
+            oAuth2UserInfo= new GoogleUserInfo(oAuth2User.getAttributes());
+        }else if(userRequest.getClientRegistration().getRegistrationId().equals("facebook")){
+            oAuth2UserInfo= new FacebookUserInfo(oAuth2User.getAttributes());
+            System.out.println("Facebook Login Try");
+        }else{
+            System.out.println("other login access");
+        }
+
+        // String provider=userRequest.getClientRegistration().getRegistrationId();  // Google
+        String provider=oAuth2UserInfo.getProvider();   // provider가 null이면 일반로그인, 아니면 oauth로그인
+        // String providerId=oAuth2User.getAttribute("sub");       // Google ID
+        String providerId=oAuth2UserInfo.getProviderId();
         String username=provider+"_"+providerId;    // google_sub
         String password=bCryptPasswordEncoder.encode("겟인데어");
-        String providerEmail=oAuth2User.getAttribute("email");       // Google Email
+        //String providerEmail=oAuth2User.getAttribute("email");       // Google Email
+        String providerEmail=oAuth2UserInfo.getEmail();
         String role="ROLE_USER";
 
         User userEntity=userRepository.findByUsername(username);

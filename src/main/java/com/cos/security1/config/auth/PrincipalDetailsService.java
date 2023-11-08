@@ -2,6 +2,7 @@ package com.cos.security1.config.auth;
 
 import com.cos.security1.model.User;
 import com.cos.security1.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,10 +13,12 @@ import org.springframework.stereotype.Service;
 // login 요청이 들어오면 자동으로 UserDetailsService 타입으로
 // IoC되어 있는 loadUserByUsername 함수가 실행됨
 @Service
+@RequiredArgsConstructor
 public class PrincipalDetailsService implements UserDetailsService {
 
-    @Autowired
+    //@Autowired
     private UserRepository userRepository;
+    //private final UserRepository userRepository;
 
     // Security Session = Authentication = UserDetails
     // Security Session(내부 Authentication(내부 UserDetails))

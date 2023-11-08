@@ -49,10 +49,11 @@ public class SecurityConfig{
 
     @Autowired
     private PrincipalOauth2UserService principalOauth2UserService;
-    @Bean   // @Bean의 역할은 해당 메서드의 return 되는 Object를 IoC로 등록해줌
-    public BCryptPasswordEncoder encodePwd(){
-        return new BCryptPasswordEncoder();
-    }
+//    @Bean   // @Bean의 역할은 해당 메서드의 return 되는 Object를 IoC로 등록해줌
+//    public BCryptPasswordEncoder encodePwd(){
+//        return new BCryptPasswordEncoder();
+//    }
+    // Circular Dependency Injection 해결을 위해서 encodePwd() 생성자 코드를 Application.java로 옮김
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
